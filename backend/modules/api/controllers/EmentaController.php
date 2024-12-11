@@ -2,7 +2,11 @@
 
 namespace backend\modules\api\controllers;
 
+use Yii;
+use yii\db\Query;
 use yii\rest\ActiveController;
+use yii\web\BadRequestHttpException;
+use yii\web\Response;
 
 /**
  * Default controller for the `api` module
@@ -18,5 +22,44 @@ class EmentaController extends ActiveController
     {
         return $this->render('index');
     }
+
+    public function actionPratosSopaComSenhas($user_id) {
+        if (empty($user_id)) {
+            throw new BadRequestHttpException('O parâmetro "user_id" é obrigatório.');
+        }
+
+        $query = new Query();
+        $result = $query->select([
+            'e.id',
+            'e.cozinha_id',
+            'e.data',
+            'nor.id AS prato_normal_id',
+            'nor.designacao AS prato_normal_nome',
+            'veg.id AS prato_vegetariano_id',
+            'veg.designacao AS prato_vegetariano_nome',
+            'sop.designacao AS sopa_nome',
+            's.id AS senha_id',
+            's.prato_id AS senha_prato',
+            'senha_prato.designacao AS senha_prato_nome',
+            'senha_prato.tipo AS senha_prato_tipo'
+        ])
+            ->from('ementas e')
+            ->innerJoin('pratos nor', 'e.prato_normal = nor.id')
+            ->innerJoin('pratos veg', 'e.prato_vegetariano = veg.id')
+            ->innerJoin('pratos sop', 'e.sopa = sop.id')
+            ->leftJoin('senhas s', 's.ementa_id = e.id AND s.user_id = :user_id')
+            ->leftJoin('pratos senha_prato', 's.prato_id = senha_prato.id')
+            ->andWhere(['between', 'e.data', new \yii\db\Expression('CURRENT_DATE()'), new \yii\db\Expression('DATE_ADD(CURRENT_DATE(), INTERVAL 7 DAY)')])
+            ->andWhere(['e.cozinha_id' => 3])
+            ->addParams([':user_id' => $user_id])
+            ->all();
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        return $result;
+    }
+
+
+
 }
 

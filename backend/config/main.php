@@ -46,9 +46,11 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/user',
+
+                ['class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/user',
                     'extraPatterns' => [
-                        'POST login' => 'login' ,
+                        'POST login' => 'login',
                         'POST register' => 'register'
                     ]
                 ],
@@ -59,7 +61,13 @@ return [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/linhasfatura'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/movimento'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/profile'],
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/senha'],
+                ['class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/senha',
+                    'extraPatterns' => [
+                        'GET api/senha/pratos-sopa' => 'api/senha/pratos-sopa',
+                        'GET api/ementa/pratos-sopa-com-senhas' => 'api/ementa/pratos-sopa-com-senhas',
+                    ]
+                ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/valor'],
 
             ],

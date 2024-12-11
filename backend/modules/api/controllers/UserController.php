@@ -53,7 +53,6 @@ class UserController extends ActiveController
     }
 
 
-
     public function actionRegister()
     {
         try {
