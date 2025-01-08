@@ -41,16 +41,35 @@ class UserController extends ActiveController
 
         $username = $request['username'] ?? null;
         $password = $request['password'] ?? null;
-        $user = $this->auth($username, $password);
 
-        return [
-            'status' => 'success',
-            'message' => 'Login bem-sucedido!',
-            'username' => $username,
-            'access_token' => $user->getAuthKey(),
-            'token_type' => 'bearer',
-        ];
+        try {
+            $user = $this->auth($username, $password);
+
+            $profile = Profile::findOne(['user_id' => $user->id]);
+
+            if (!$profile) {
+                throw new BadRequestHttpException('Perfil não encontrado para este usuário.');
+            }
+
+            return [
+                'status' => 'success',
+                'message' => 'Login bem-sucedido!',
+                'data' => [
+                    'user' => $user->attributes,
+                    'profile' => $profile->attributes,
+                ],
+                'access_token' => $user->getAuthKey(),
+                'token_type' => 'bearer',
+            ];
+        } catch (\Exception $e) {
+            Yii::$app->response->statusCode = 500;
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ];
+        }
     }
+
 
 
     public function actionRegister()
