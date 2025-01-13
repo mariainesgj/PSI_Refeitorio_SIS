@@ -57,7 +57,23 @@ return [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/cozinha'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/ementa'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/fatura'],
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/linhascarrinho'],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/carrinho',
+                    'extraPatterns' => [
+                        'POST criar' => 'create-cart',
+                        'GET <id:\d+>' => 'get-cart-by-id',
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/linhascarrinho',
+                    'extraPatterns' => [
+                        'POST adicionar-item' => 'adicionar-item',
+                        'DELETE excluir-item/{id}' => 'excluir-item',
+                    ],
+                ],
+
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/linhasfatura'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/movimento'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/profile'],
