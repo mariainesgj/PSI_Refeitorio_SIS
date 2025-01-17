@@ -112,7 +112,7 @@ class UserController extends ActiveController
             ]);
 
             if (!$userModel->validate() || !$userModel->save()) {
-                throw new BadRequestHttpException('Erro ao criar o usuário. Verifique se o nome de usuário ou email já estão em uso.');
+                throw new BadRequestHttpException('Erro ao criar o utilizador. Verifique se o nome de utilizador ou email já estão em uso.');
             }
 
             $profileModel = new Profile([
@@ -143,7 +143,7 @@ class UserController extends ActiveController
             Yii::$app->response->statusCode = 200;  // HTTP status code 200
             return [
                 'status' => 'success',
-                'message' => 'Usuário criado com sucesso!',
+                'message' => 'Utilizador criado com sucesso!',
                 'data' => [
                     'user' => $userAttr,
                 ],
