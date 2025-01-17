@@ -51,12 +51,16 @@ class UserController extends ActiveController
                 throw new BadRequestHttpException('Perfil não encontrado para este usuário.');
             }
 
+
+            $userAttr = $user->attributes;
+            $userAttr["profile"] = $profile->attributes;
+            unset($userAttr["password_hash"], $userAttr["auth_key"], $userAttr["verification_token"], $userAttr["password_reset_token"] );
+
             return [
                 'status' => 'success',
                 'message' => 'Login bem-sucedido!',
                 'data' => [
-                    'user' => $user->attributes,
-                    'profile' => $profile->attributes,
+                    'user' => $userAttr,
                 ],
                 'access_token' => $user->getAuthKey(),
                 'token_type' => 'bearer',
@@ -78,23 +82,21 @@ class UserController extends ActiveController
             $rawBody = Yii::$app->request->getRawBody();
             $requestData = json_decode($rawBody, true);
 
-            if (empty($requestData['user']) || empty($requestData['profile'])) {
-                throw new BadRequestHttpException('Dados de usuário ou perfil estão ausentes.');
+            if (empty($requestData)) {
+                throw new BadRequestHttpException('Dados estão ausentes.');
             }
 
-            $user = $requestData['user'];
-            $username = $user['username'] ?? null;
-            $email = $user['email'] ?? null;
-            $password = $user['password'] ?? null;
+            $username = $requestData['username'] ?? null;
+            $email = $requestData['email'] ?? null;
+            $password = $requestData['password'] ?? null;
 
-            $profile = $requestData['profile'];
-            $name = $profile['name'] ?? null;
-            $mobile = $profile['mobile'] ?? null;
-            $street = $profile['street'] ?? null;
-            $locale = $profile['locale'] ?? null;
-            $postalCode = $profile['postalCode'] ?? null;
-            $role = $profile['role'] ?? null;
-            $cozinha_id = $profile['cozinha_id'] ?? null;
+            $name = $requestData['name'] ?? null;
+            $mobile = $requestData['mobile'] ?? null;
+            $street = $requestData['street'] ?? null;
+            $locale = $requestData['locale'] ?? null;
+            $postalCode = $requestData['postalCode'] ?? null;
+            $role = $requestData['role'] ?? null;
+            $cozinha_id = $requestData['cozinha_id'] ?? null;
 
             if (!$username || !$email || !$password) {
                 throw new BadRequestHttpException('Campos obrigatórios (username, email, password) estão faltando.');
@@ -121,20 +123,29 @@ class UserController extends ActiveController
                 'postalCode' => $postalCode,
                 'role' => $role,
                 'user_id' => $userModel->id,
-                'cozinha_id' => $cozinha_id
+                'cozinha_id' => $cozinha_id,
             ]);
 
             if (!$profileModel->validate() || !$profileModel->save()) {
                 throw new BadRequestHttpException('Falha ao criar o perfil.');
             }
 
+            $userAttr = $userModel->attributes;
+            $profileAttr = $profileModel->attributes;
+            unset(
+                $userAttr["password_hash"],
+                $userAttr["auth_key"],
+                $userAttr["verification_token"],
+                $userAttr["password_reset_token"]
+            );
+            $userAttr["profile"] = $profileAttr;
+
             Yii::$app->response->statusCode = 200;  // HTTP status code 200
             return [
                 'status' => 'success',
                 'message' => 'Usuário criado com sucesso!',
                 'data' => [
-                    'user' => $userModel->attributes,
-                    'profile' => $profileModel->attributes,
+                    'user' => $userAttr,
                 ],
             ];
         } catch (\Exception $e) {
@@ -145,6 +156,7 @@ class UserController extends ActiveController
             ];
         }
     }
+
 
 
 }
