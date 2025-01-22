@@ -7,6 +7,7 @@ use common\models\User;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Default controller for the `api` module
@@ -63,7 +64,6 @@ class UserController extends ActiveController
                     'user' => $userAttr,
                 ],
                 'access_token' => $user->getAuthKey(),
-                'token_type' => 'bearer',
             ];
         } catch (\Exception $e) {
             Yii::$app->response->statusCode = 500;
@@ -134,7 +134,6 @@ class UserController extends ActiveController
             $profileAttr = $profileModel->attributes;
             unset(
                 $userAttr["password_hash"],
-                $userAttr["auth_key"],
                 $userAttr["verification_token"],
                 $userAttr["password_reset_token"]
             );
@@ -144,6 +143,7 @@ class UserController extends ActiveController
             return [
                 'status' => 'success',
                 'message' => 'Utilizador criado com sucesso!',
+                'access_token' => $userModel->auth_key,
                 'data' => [
                     'user' => $userAttr,
                 ],
@@ -156,6 +156,89 @@ class UserController extends ActiveController
             ];
         }
     }
+
+
+    public function actionUpdate($id)
+    {
+        try {
+            $rawBody = Yii::$app->request->getRawBody();
+            $requestData = json_decode($rawBody, true);
+
+            if (empty($requestData)) {
+                throw new BadRequestHttpException('Dados estão ausentes.');
+            }
+
+            $username = $requestData['username'] ?? null;
+            $email = $requestData['email'] ?? null;
+            $password = $requestData['password'] ?? null;
+            $name = $requestData['name'] ?? null;
+            $mobile = $requestData['mobile'] ?? null;
+            $street = $requestData['street'] ?? null;
+            $locale = $requestData['locale'] ?? null;
+            $postalCode = $requestData['postalCode'] ?? null;
+            $role = $requestData['role'] ?? null;
+            $cozinha_id = $requestData['cozinha_id'] ?? null;
+
+            $userModel = User::findOne($id);
+
+            if (!$userModel) {
+                throw new NotFoundHttpException('Usuário não encontrado.');
+            }
+
+            $userModel->username = $username ?? $userModel->username;
+            $userModel->email = $email ?? $userModel->email;
+            if ($password) {
+                $userModel->password = Yii::$app->security->generatePasswordHash($password);
+            }
+
+            if (!$userModel->validate() || !$userModel->save()) {
+                throw new BadRequestHttpException('Erro ao atualizar o utilizador.');
+            }
+
+            $profileModel = Profile::findOne(['user_id' => $id]);
+
+            if (!$profileModel) {
+                throw new NotFoundHttpException('Perfil não encontrado.');
+            }
+
+            $profileModel->name = $name ?? $profileModel->name;
+            $profileModel->mobile = $mobile ?? $profileModel->mobile;
+            $profileModel->street = $street ?? $profileModel->street;
+            $profileModel->locale = $locale ?? $profileModel->locale;
+            $profileModel->postalCode = $postalCode ?? $profileModel->postalCode;
+            $profileModel->role = $role ?? $profileModel->role;
+            $profileModel->cozinha_id = $cozinha_id ?? $profileModel->cozinha_id;
+
+            if (!$profileModel->validate() || !$profileModel->save()) {
+                throw new BadRequestHttpException('Erro ao atualizar o perfil.');
+            }
+
+            $userAttr = $userModel->attributes;
+            $profileAttr = $profileModel->attributes;
+            unset(
+                $userAttr["password_hash"],
+                $userAttr["verification_token"],
+                $userAttr["password_reset_token"]
+            );
+            $userAttr["profile"] = $profileAttr;
+
+            Yii::$app->response->statusCode = 200;  // HTTP status code 200
+            return [
+                'status' => 'success',
+                'message' => 'Utilizador atualizado com sucesso!',
+                'data' => [
+                    'user' => $userAttr,
+                ],
+            ];
+        } catch (\Exception $e) {
+            Yii::$app->response->statusCode = 500;  // HTTP status code 500
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
 
 
 

@@ -5,6 +5,7 @@ namespace backend\modules\api\controllers;
 use common\models\Senha;
 use Yii;
 use yii\db\Query;
+use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
@@ -15,6 +16,19 @@ use yii\web\Response;
 class SenhaController extends ActiveController
 {
     public $modelClass = 'common\models\Senha';
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        // Adicionar autenticação via token
+        $behaviors['authenticator'] = [
+            'class' => HttpBearerAuth::class,
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * Renders the index view for the module
      * @return string
@@ -25,13 +39,15 @@ class SenhaController extends ActiveController
     }
 
 
-    public function actionPratosSopa($userId, $data)
+    public function actionPratosSopa( $data)
     {
 
-        if (empty($userId) || empty($data)) {
+        if (empty($data)) {
             Yii::$app->response->statusCode = 400;
             return ['error' => 'Parâmetros inválidos'];
         }
+
+        $userId = Yii::$app->user->id;
 
         $query = new Query();
         $result = $query->select([
@@ -51,11 +67,15 @@ class SenhaController extends ActiveController
 
         if (empty($result)) {
             Yii::$app->response->statusCode = 404;
-            return ['message' => 'Nenhuma senha encontrada para o utilizador e data especificados.'];
+            return ["status" => "success", 'message' => 'Nenhuma senha encontrada para o utilizador e data especificados.' , "data" => [] ];
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
-        return $result;
+        return [
+            "status" => "success",
+            "message" => "Sucesso!",
+            "data" => $result[0]
+        ];;
     }
 }
 

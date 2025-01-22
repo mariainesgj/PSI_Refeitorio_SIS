@@ -51,12 +51,19 @@ return [
                     'controller' => 'api/user',
                     'extraPatterns' => [
                         'POST login' => 'login',
-                        'POST register' => 'register'
+                        'POST register' => 'register',
+                        'PUT update/{id}' => 'update',
                     ]
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/cozinha'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/ementa'],
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/fatura'],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/fatura',
+                    'extraPatterns' => [
+                        'GET by-user' => 'by-user',
+                    ]
+                ],
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'api/carrinho',
