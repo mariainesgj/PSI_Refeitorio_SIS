@@ -42,7 +42,6 @@ class FaturaController extends ActiveController
 
     public function actionByUser()
     {
-
         $user_id = Yii::$app->user->id;
 
         if (empty($user_id)) {
@@ -50,19 +49,30 @@ class FaturaController extends ActiveController
         }
 
         $query = new Query();
-        $result = $query->select(['id', 'data', 'total_iliquido', 'total_iva', 'total_doc'])
+        $faturas = $query->select(['id', 'data', 'total_iliquido', 'total_iva', 'total_doc'])
             ->from('faturas')
             ->where(['user_id' => $user_id])
             ->all();
+
+        foreach ($faturas as &$fatura) {
+            $fatura_linhas = (new Query())
+                ->select(['id', 'senha_id', 'preco', 'taxa_iva', 'quantidade'])
+                ->from('linhasfaturas')
+                ->where(['fatura_id' => $fatura['id']])
+                ->all();
+
+            $fatura['linhas'] = $fatura_linhas;
+        }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         return [
             "status" => "success",
             "message" => "Faturas listadas com sucesso",
-            "data" => $result
+            "data" => $faturas,
         ];
     }
+
 }
 
 
