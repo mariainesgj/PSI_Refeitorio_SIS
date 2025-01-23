@@ -66,8 +66,7 @@ class SenhaController extends ActiveController
             ->all();
 
         if (empty($result)) {
-            Yii::$app->response->statusCode = 404;
-            return ["status" => "success", 'message' => 'Nenhuma senha encontrada para o utilizador e data especificados.' , "data" => [] ];
+            return ["status" => "empty", 'message' => 'Nenhuma senha encontrada para o utilizador e data especificados.' , "data" => [] ];
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;

@@ -20,6 +20,7 @@ class CarrinhoController extends ActiveController
         return $this->render('index');
     }
 
+    //TODO receber unico carrinho ativo do user logado e respetivas linhas
     public function actionCreateCart()
     {
         $userId = Yii::$app->user->id;

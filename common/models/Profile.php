@@ -15,6 +15,7 @@ use Yii;
  * @property string $postalCode
  * @property string|null $role
  * @property int $user_id
+ * @property int $cozinha_id
  *
  * @property User $user
  */
