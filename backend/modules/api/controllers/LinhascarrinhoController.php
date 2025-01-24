@@ -6,6 +6,7 @@ use common\models\Carrinho;
 use common\models\Linhascarrinho;
 use HttpException;
 use Yii;
+use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
 
 /**
@@ -14,6 +15,19 @@ use yii\rest\ActiveController;
 class LinhascarrinhoController extends ActiveController
 {
     public $modelClass = 'common\models\Linhascarrinho';
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        // Adicionar autenticação via token
+        $behaviors['authenticator'] = [
+            'class' => HttpBearerAuth::class,
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * Renders the index view for the module
      * @return string
@@ -32,20 +46,18 @@ class LinhascarrinhoController extends ActiveController
     {
         $userId = Yii::$app->user->id;
 
-        if (!$userId) {
-            throw new HttpException(401, 'Usuário não autenticado');
-        }
-
         $carrinho = Carrinho::find()
             ->where(['user_id' => $userId, 'status' => 'active'])
             ->one();
 
-        if (!$carrinho) {
+        if (!isset($carrinho)) {
             $carrinhoController = new CarrinhoController('carrinho', Yii::$app);
-            $carrinho = $carrinhoController->actionCreateCart();
+            $response = $carrinhoController->actionCreateCart();
+            $carrinho = $response["data"];
             if (!$carrinho) {
                 throw new HttpException(400, 'Erro ao criar carrinho');
             }
+            $carrinhoId = $carrinho->id;
         } else{
             $carrinhoId = $carrinho->id;
         }
@@ -59,6 +71,15 @@ class LinhascarrinhoController extends ActiveController
                 'carrinho_id' => $carrinho->id,
             ];
         }
+
+
+
+        $linhaPrevious = LinhasCarrinho::findOne(["ementa_id" => $data['ementa_id']]);
+
+        if(isset($linhaPrevious)){
+            $linhaPrevious->delete();
+        }
+
 
         $linhaCarrinho = new LinhasCarrinho();
         $linhaCarrinho->carrinho_id = $carrinhoId;
@@ -83,13 +104,14 @@ class LinhascarrinhoController extends ActiveController
     public function actionExcluirItem($id) // {base_url}/linhascarrinho/excluir-item/123
     {
         $userId = Yii::$app->user->id;
-        if (!$userId) {
-            throw new HttpException(401, 'Utilizador não autenticado');
-        }
 
         $linhaCarrinho = LinhasCarrinho::findOne($id);
-        if (!$linhaCarrinho) {
-            throw new HttpException(404, 'Senha do carrinho não encontrado');
+        if (!isset($linhaCarrinho)) {
+            Yii::$app->response->statusCode = 404;
+            return [
+                'status' => 'error',
+                'message' => 'Erro ao excluir senha do carrinho.',
+            ];
         }
 
         if ($linhaCarrinho->delete()) {

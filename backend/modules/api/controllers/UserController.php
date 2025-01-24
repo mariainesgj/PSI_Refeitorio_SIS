@@ -158,7 +158,7 @@ class UserController extends ActiveController
     }
 
 
-    public function actionUpdate($id)
+    public function actionUpdate()
     {
         try {
             $rawBody = Yii::$app->request->getRawBody();
@@ -179,10 +179,14 @@ class UserController extends ActiveController
             $role = $requestData['role'] ?? null;
             $cozinha_id = $requestData['cozinha_id'] ?? null;
 
-            $userModel = User::findOne($id);
+
+            $userId = Yii::$app->user->id;
+            $userModel = User::findOne($userId);
+
+            //var_dump($userModel);exit;
 
             if (!$userModel) {
-                throw new NotFoundHttpException('Usuário não encontrado.');
+                throw new NotFoundHttpException('Utilizador não encontrado.');
             }
 
             $userModel->username = $username ?? $userModel->username;
@@ -195,7 +199,7 @@ class UserController extends ActiveController
                 throw new BadRequestHttpException('Erro ao atualizar o utilizador.');
             }
 
-            $profileModel = Profile::findOne(['user_id' => $id]);
+            $profileModel = Profile::findOne(['user_id' => $userId]);
 
             if (!$profileModel) {
                 throw new NotFoundHttpException('Perfil não encontrado.');

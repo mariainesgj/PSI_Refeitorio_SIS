@@ -52,7 +52,7 @@ return [
                     'extraPatterns' => [
                         'POST login' => 'login',
                         'POST register' => 'register',
-                        'PUT update/{id}' => 'update',
+                        'PUT update' => 'update',
                     ]
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/cozinha'],
@@ -68,8 +68,10 @@ return [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'api/carrinho',
                     'extraPatterns' => [
+                        'GET carrinho-ativo' => 'carrinho-ativo',
                         'POST criar' => 'create-cart',
                         'GET <id:\d+>' => 'get-cart-by-id',
+                        'POST checkout' => 'checkout'
                     ],
                 ],
                 [
@@ -77,7 +79,7 @@ return [
                     'controller' => 'api/linhascarrinho',
                     'extraPatterns' => [
                         'POST adicionar-item' => 'adicionar-item',
-                        'DELETE excluir-item/{id}' => 'excluir-item',
+                        'DELETE excluir-item' => 'excluir-item',
                     ],
                 ],
 

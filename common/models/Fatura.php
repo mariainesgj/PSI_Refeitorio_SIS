@@ -13,7 +13,10 @@ use Yii;
  * @property string $data
  * @property int $user_id
  * @property float $total_doc
- *
+ * @property string|null $numero_cartao
+ * @property string|null $validade
+ * @property string|null $codigo_seguranca
+ * @property string|null $titular
  * @property Linhasfatura[] $linhasfaturas
  * @property User $user
  */
@@ -41,6 +44,7 @@ class Fatura extends \yii\db\ActiveRecord
             [['data'], 'safe'],
             [['user_id'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['numero_cartao', 'validade', 'codigo_seguranca', 'titular'], 'string', 'max' => 255],
         ];
     }
 
