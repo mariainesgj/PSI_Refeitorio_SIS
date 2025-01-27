@@ -52,7 +52,6 @@ return [
                     'extraPatterns' => [
                         'POST login' => 'login',
                         'POST register' => 'register',
-                        'PUT update' => 'update',
                     ]
                 ],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/cozinha'],
@@ -85,7 +84,12 @@ return [
 
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/linhasfatura'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/movimento'],
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'api/profile'],
+                ['class' => 'yii\rest\UrlRule',
+                    'controller' => 'api/profile',
+                    'extraPatterns' => [
+                        'PUT update' => 'update',
+                    ]
+                ],
                 ['class' => 'yii\rest\UrlRule',
                     'controller' => 'api/senha',
                     'extraPatterns' => [
