@@ -52,6 +52,7 @@ class FaturaController extends ActiveController
         $faturas = $query->select(['id', 'data', 'total_iliquido', 'total_iva', 'total_doc'])
             ->from('faturas')
             ->where(['user_id' => $user_id])
+            ->orderBy(['data' => SORT_DESC])
             ->all();
 
         foreach ($faturas as &$fatura) {
